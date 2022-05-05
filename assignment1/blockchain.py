@@ -8,9 +8,6 @@ class Transaction:
         self.sender = sender
         self.receiver = receiver
         self.amount = amount
-    
-    def stringify(self) -> str:
-        return "".join([self.sender, self.receiver, str(self.amount)])
 
     def format_string(self) -> str:
         _format_string = "{0} sends {1} {2} bitcoin.".format(self.sender, self.receiver, self.amount) 
@@ -20,6 +17,9 @@ class Transaction:
 class Block:
     def __init__(self, prev_hash: str, transactions: list, index: int):
         self.prev_hash = prev_hash
+        # I originally thought that a block might contain more than 1 transaction
+        # so I implemented it as a list.
+        # Seems like it should just be of length 1
         self.transactions = transactions
         self.nonce = 1
         self.index = index
@@ -34,11 +34,14 @@ class Block:
         print(format_string)
 
     def compute_hash(self) -> str:
-        transactions_str = list(map((lambda t: t.stringify()), self.transactions))
+        transactions_str = list(map((lambda t: t.format_string()), self.transactions))
         block_content = self.prev_hash + "".join(transactions_str) + str(self.nonce)
         return hashlib.sha256(block_content.encode('UTF-8')).hexdigest()
 
     def proof_of_work(self):
+        """
+        Perform proof of work to validate transaction and add transaction to chain. Essentially mine the transaction
+        """
         # Difficulty is set to 4 in accordance with webpage
         while not self.compute_hash().startswith("0000"):
             self.nonce += 1
@@ -63,7 +66,11 @@ class Blockchain:
     def get_last_block(self) -> Block:
         return self.chain[-1]
 
+
     def new_block(self):
+        """
+        Create a New block for a transaction here
+        """
         transaction = self.transaction_pool[0]
         block = Block(self.get_last_block().hash, [transaction], self.current_index)
         block.proof_of_work()
@@ -72,6 +79,9 @@ class Blockchain:
         self.transaction_pool = []
 
     def new_transaction(self, sender, receiver, amount):
+        """
+        Define a transaction between users here
+        """
         transaction = Transaction(sender, receiver, amount)
         self.transaction_pool.append(transaction)
 
@@ -80,9 +90,16 @@ class Blockchain:
             self.chain[i].format_print()
 
 if __name__ == "__main__":
+    # Define the Blockchain
     my_blockchain = Blockchain()
+    
+    # Define a transaction
     my_blockchain.new_transaction("Alice", "Bob", 1)
+
+    # Validate transaction and add to blockchain
     my_blockchain.new_block()
+    
+    # Repeat to get 5 entries
     my_blockchain.new_transaction("Bob", "Chad", 2)
     my_blockchain.new_block()
     my_blockchain.new_transaction("Chad", "Dan", 3)
@@ -92,13 +109,9 @@ if __name__ == "__main__":
     my_blockchain.new_transaction("Erin", "Frank", 5)
     my_blockchain.new_block()
 
+    # Display the blockchain
     my_blockchain.format_print()
 
-    #Define the Blockchain
     
 
-    #Define a transaction
-
-    #Validate transaction and add to blockchain
-
-    #Display the blockchain
+    
