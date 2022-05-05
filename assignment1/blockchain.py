@@ -1,24 +1,7 @@
 #Function imports
 
 import hashlib
-from hmac import trans_36 
 import json
-import re 
-
-def computeHash(tmp, nonce):
-    string = tmp + str(nonce)
-    return hashlib.sha256(string.encode()).hexdigest()
-
-def computeNonce(transaction, prev_hash):
-    tmp = prev_hash+transaction
-    nonce = 1
-    new_hash = computeHash(tmp, nonce)
-    while not new_hash.startswith('0000'):
-        nonce += 1
-        new_hash = computeHash(tmp, nonce)
-    print(new_hash)
-    return nonce
-
 
 class Transaction:
     def __init__(self, sender: str, receiver: str, amount: int):
@@ -47,9 +30,7 @@ class Block:
         format_string += "  Nonce: {0}\n".format(self.nonce)
         format_string += "  Previous hash: {0}\n".format(self.prev_hash)
         format_string += "  Current hash : {0}\n".format(self.hash)
-        format_string += "  Transactions record:\n"
-        for i in range(len(self.transactions)):
-            format_string += "     {0}\n".format(self.transactions[i].format_string())
+        format_string += "  Transaction  : {0}\n".format(self.transactions[0].format_string())
         print(format_string)
 
     def compute_hash(self) -> str:
